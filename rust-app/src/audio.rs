@@ -20,18 +20,24 @@ impl AudioPlayer {
             let buf = BufReader::new(file);
             if let Ok(source) = Decoder::new(buf) {
                 self.sink.append(source);
-                let sink_ref = self.sink.clone();
                 let path_clone = seg.audio_path.clone();
-                tokio::spawn(async move {
-                    while !sink_ref.empty() {
-                        tokio::time::sleep(std::time::Duration::from_millis(500)).await;
-                    }
-                    let _ = tokio::fs::remove_file(path_clone).await;
+                let dur = seg.duration_ms;
+                std::thread::spawn(move || {
+                    std::thread::sleep(std::time::Duration::from_millis(dur + 5000));
+                    let _ = std::fs::remove_file(&path_clone);
                 });
             }
         }
     }
-    
+
+    pub fn is_empty(&self) -> bool {
+        self.sink.empty()
+    }
+
+    pub fn queue_len(&self) -> usize {
+        self.sink.len()
+    }
+
     pub fn pause(&self) { self.sink.pause(); }
     pub fn resume(&self) { self.sink.play(); }
     pub fn clear(&self) { self.sink.clear(); }
