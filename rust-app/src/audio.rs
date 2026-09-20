@@ -1,7 +1,6 @@
 use crate::domain::AudioSegment;
-use rodio::{OutputStream, Sink, Decoder};
-use std::fs::File;
-use std::io::BufReader;
+use rodio::{Decoder, OutputStream, Sink};
+use std::io::Cursor;
 
 pub struct AudioPlayer {
     _stream: OutputStream,
@@ -15,30 +14,37 @@ impl AudioPlayer {
         Ok(Self { _stream, sink })
     }
 
-    pub fn play_segment(&self, seg: AudioSegment) {
-        if let Ok(file) = File::open(&seg.audio_path) {
-            let buf = BufReader::new(file);
-            if let Ok(source) = Decoder::new(buf) {
+    pub fn play_segment(&self, seg: AudioSegment) -> (usize, bool) {
+        let empty_before = self.sink.empty();
+        let cursor = Cursor::new(seg.audio_bytes);
+        match Decoder::new(cursor) {
+            Ok(source) => {
                 self.sink.append(source);
-                let path_clone = seg.audio_path.clone();
-                let dur = seg.duration_ms;
-                std::thread::spawn(move || {
-                    std::thread::sleep(std::time::Duration::from_millis(dur + 5000));
-                    let _ = std::fs::remove_file(&path_clone);
-                });
+            }
+            Err(e) => {
+                eprintln!("[Audio] Lỗi decode MP3 in-memory: {}", e);
             }
         }
+        (self.sink.len(), empty_before)
     }
 
+    #[allow(dead_code)]
     pub fn is_empty(&self) -> bool {
         self.sink.empty()
     }
 
+    #[allow(dead_code)]
     pub fn queue_len(&self) -> usize {
         self.sink.len()
     }
 
-    pub fn pause(&self) { self.sink.pause(); }
-    pub fn resume(&self) { self.sink.play(); }
-    pub fn clear(&self) { self.sink.clear(); }
+    pub fn pause(&self) {
+        self.sink.pause();
+    }
+    pub fn resume(&self) {
+        self.sink.play();
+    }
+    pub fn clear(&self) {
+        self.sink.clear();
+    }
 }

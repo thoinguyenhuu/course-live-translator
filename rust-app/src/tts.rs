@@ -1,26 +1,21 @@
-use crate::domain::AudioSegment;
 use anyhow::Result;
-use std::path::PathBuf;
 use std::time::Duration;
-use uuid::Uuid;
-use tokio::fs;
 
 pub struct TtsProvider {
-    temp_dir: PathBuf,
     client: reqwest::Client,
 }
 
 impl TtsProvider {
-    pub async fn new() -> Result<Self> {
-        let temp_dir = std::env::temp_dir().join("coursera-translator");
-        fs::create_dir_all(&temp_dir).await?;
-        Ok(Self {
-            temp_dir,
-            client: reqwest::Client::builder().timeout(Duration::from_secs(8)).build().unwrap(),
-        })
+    pub fn new() -> Self {
+        Self {
+            client: reqwest::Client::builder()
+                .timeout(Duration::from_secs(8))
+                .build()
+                .unwrap(),
+        }
     }
 
-    pub async fn synthesize(&self, id: &str, text: &str) -> Result<AudioSegment> {
+    pub async fn synthesize(&self, text: &str) -> Result<Vec<u8>> {
         let mut last_err = anyhow::anyhow!("Unknown TTS error");
         let retry_delays = [Duration::from_millis(500), Duration::from_millis(1000)];
 
@@ -29,8 +24,8 @@ impl TtsProvider {
                 tokio::time::sleep(retry_delays[attempt - 1]).await;
             }
 
-            match self.do_synthesize(id, text).await {
-                Ok(seg) => return Ok(seg),
+            match self.do_synthesize(text).await {
+                Ok(bytes) => return Ok(bytes),
                 Err(e) => {
                     eprintln!("[TTS] Lần thử {} thất bại: {}", attempt + 1, e);
                     last_err = e;
@@ -41,18 +36,18 @@ impl TtsProvider {
         Err(last_err)
     }
 
-    async fn do_synthesize(&self, id: &str, text: &str) -> Result<AudioSegment> {
-        let file_name = format!("{}.mp3", Uuid::new_v4());
-        let path = self.temp_dir.join(&file_name);
-
-        // Google TTS giới hạn 200 ký tự mỗi request
+    async fn do_synthesize(&self, text: &str) -> Result<Vec<u8>> {
+        // Google TTS giới hạn độ dài mỗi request (~200 ký tự)
         // Cắt text thành các cụm nhỏ theo từ nếu dài hơn 160 ký tự
         let chunks = split_text_into_chunks(text, 160);
         let mut combined_bytes: Vec<u8> = Vec::new();
 
         for chunk in chunks {
             let q = urlencoding::encode(&chunk);
-            let url = format!("https://translate.google.com/translate_tts?ie=UTF-8&q={}&tl=vi&client=tw-ob", q);
+            let url = format!(
+                "https://translate.google.com/translate_tts?ie=UTF-8&q={}&tl=vi&client=tw-ob",
+                q
+            );
             let response = self.client.get(&url).send().await?.bytes().await?;
 
             if response.is_empty() {
@@ -66,16 +61,7 @@ impl TtsProvider {
             return Err(anyhow::anyhow!("Không thể tạo âm thanh từ TTS"));
         }
 
-        // Ước lượng thời lượng mp3 ~ 8kbps (8000 bits/s = 1000 bytes/s)
-        let duration_ms = ((combined_bytes.len() as u64) / 1000) * 1000;
-
-        fs::write(&path, &combined_bytes).await?;
-
-        Ok(AudioSegment {
-            id: id.to_string(),
-            audio_path: path.to_string_lossy().to_string(),
-            duration_ms: duration_ms.max(1000),
-        })
+        Ok(combined_bytes)
     }
 }
 

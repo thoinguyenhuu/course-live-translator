@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::time::Instant;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SubtitleSegment {
@@ -18,24 +19,34 @@ pub struct WorkItem {
     pub start_time_ms: u64,
     pub text: String,
     pub context: Vec<String>,
+    pub created_at: Instant,
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct AudioResult {
     pub generation: u64,
     pub seq: u64,
     pub start_time_ms: u64,
     pub segment: Option<AudioSegment>, // None nếu thất bại sau retry
+    pub trans_ms: u64,
+    pub tts_ms: u64,
+    pub created_at: Instant,
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct AudioSegment {
     pub id: String,
-    pub audio_path: String,
-    pub duration_ms: u64,
+    pub audio_bytes: Vec<u8>,
+    pub seq: u64,
+    pub trans_ms: u64,
+    pub tts_ms: u64,
+    pub created_at: Instant,
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub enum ControlMessage {
     Play,
     Pause,

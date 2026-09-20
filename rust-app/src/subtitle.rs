@@ -5,8 +5,12 @@ pub struct Deduplicator {
 }
 
 impl Deduplicator {
-    pub fn new() -> Self { Self { last_text: String::new() } }
-    
+    pub fn new() -> Self {
+        Self {
+            last_text: String::new(),
+        }
+    }
+
     pub fn process(&mut self, seg: &SubtitleSegment) -> bool {
         let text = seg.text.trim();
         if text.is_empty() || text == self.last_text {
@@ -15,8 +19,10 @@ impl Deduplicator {
         self.last_text = text.to_string();
         true
     }
-    
-    pub fn reset(&mut self) { self.last_text.clear(); }
+
+    pub fn reset(&mut self) {
+        self.last_text.clear();
+    }
 }
 
 pub struct SentenceBuffer {
@@ -26,17 +32,19 @@ pub struct SentenceBuffer {
 }
 
 impl SentenceBuffer {
-    pub fn new() -> Self { 
-        Self { 
+    pub fn new() -> Self {
+        Self {
             buffer: String::new(),
             start_time_ms: 0,
             id: String::new(),
-        } 
+        }
     }
-    
+
     pub fn push(&mut self, seg: &SubtitleSegment) -> Option<SubtitleSegment> {
         let text = seg.text.trim();
-        if text.is_empty() { return None; }
+        if text.is_empty() {
+            return None;
+        }
 
         let is_empty = self.buffer.is_empty();
 
@@ -79,9 +87,11 @@ impl SentenceBuffer {
             None
         }
     }
-    
+
     pub fn flush(&mut self) -> Option<SubtitleSegment> {
-        if self.buffer.is_empty() { return None; }
+        if self.buffer.is_empty() {
+            return None;
+        }
         let res = SubtitleSegment {
             id: self.id.clone(),
             text: self.buffer.clone(),
@@ -92,7 +102,7 @@ impl SentenceBuffer {
         Some(res)
     }
 
-    pub fn reset(&mut self) { 
-        self.buffer.clear(); 
+    pub fn reset(&mut self) {
+        self.buffer.clear();
     }
 }
