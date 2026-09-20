@@ -346,6 +346,10 @@ pub fn start_pipeline(
                             player.clear();
                             last_append_time = None;
                         }
+                        ControlMessage::SetSpeed(speed) => {
+                            println!("[Audio] Điều chỉnh tốc độ đọc: {}x", speed);
+                            player.set_speed(speed);
+                        }
                         _ => {}
                     }
                 }

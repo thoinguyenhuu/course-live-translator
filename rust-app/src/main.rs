@@ -59,6 +59,29 @@ async fn main() -> anyhow::Result<()> {
             let _ = tray.add_label("Coursera Translator");
             let _ = tray.add_label("Cổng: 3847 (Đang chạy)");
             let _ = tray.inner_mut().add_separator();
+            let _ = tray.add_label("Tốc độ đọc:");
+
+            let tx_spd1 = tx_control.clone();
+            let _ = tray.add_menu_item("  1.0x (Bình thường)", move || {
+                let _ = tx_spd1.send(domain::ControlMessage::SetSpeed(1.0));
+            });
+
+            let tx_spd2 = tx_control.clone();
+            let _ = tray.add_menu_item("  1.15x (Khuyên dùng)", move || {
+                let _ = tx_spd2.send(domain::ControlMessage::SetSpeed(1.15));
+            });
+
+            let tx_spd3 = tx_control.clone();
+            let _ = tray.add_menu_item("  1.25x (Nhanh vừa)", move || {
+                let _ = tx_spd3.send(domain::ControlMessage::SetSpeed(1.25));
+            });
+
+            let tx_spd4 = tx_control.clone();
+            let _ = tray.add_menu_item("  1.5x (Nhanh)", move || {
+                let _ = tx_spd4.send(domain::ControlMessage::SetSpeed(1.5));
+            });
+
+            let _ = tray.inner_mut().add_separator();
             let _ = tray.add_menu_item("Mở thư mục Extension", || {
                 let _ = std::process::Command::new("explorer")
                     .arg("..\\extension")

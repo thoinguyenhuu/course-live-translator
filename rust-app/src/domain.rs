@@ -53,4 +53,5 @@ pub enum ControlMessage {
     Resume,
     Seek,
     Stop,
+    SetSpeed(f32),
 }
