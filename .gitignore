@@ -1,0 +1,15 @@
+node_modules/
+dist/
+data/
+.env
+*.mp3
+
+# Rust build artifacts
+target/
+**/target/
+
+# Logs & temp files
+*.log
+rustup-init.exe
+.superpowers/
+
