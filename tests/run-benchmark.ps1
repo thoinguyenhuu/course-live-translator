@@ -12,10 +12,10 @@ Start-Sleep -Seconds 2
 $idleMem = (Get-Process -Id $proc.Id).WorkingSet64 / 1MB
 Write-Host "Idle RAM: $([math]::Round($idleMem, 2)) MB"
 
-# Run simulation
+# Run simulation using native Rust simulate client
 $simJob = Start-Job -ScriptBlock {
-    Set-Location $using:PWD
-    pnpm exec tsx tests/simulate-client.ts
+    Set-Location "$using:PWD\rust-app"
+    & "$env:USERPROFILE\.cargo\bin\cargo.exe" run --bin simulate
 }
 
 $peakMem = $idleMem

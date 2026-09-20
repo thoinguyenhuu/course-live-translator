@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Coursera Subtitle Translator",
+  "version": "1.0",
+  "permissions": ["activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["*://*.coursera.org/*"],
+      "js": ["websocket-client.js", "coursera-adapter.js", "content.js"]
+    }
+  ]
+}

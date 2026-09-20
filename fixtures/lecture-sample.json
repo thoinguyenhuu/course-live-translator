@@ -1,0 +1,12 @@
+[
+  { "time": 0,    "text": "Today we're going to discuss database transactions." },
+  { "time": 4200, "text": "A transaction consists of a sequence of operations." },
+  { "time": 8600, "text": "The key property is atomicity." },
+  { "time": 12000,"text": "If any operation fails, the entire transaction is rolled back." },
+  { "time": 16500,"text": "Databases also guarantee isolation between concurrent transactions." },
+  { "time": 21000,"text": "This prevents dirty reads and phantom reads." },
+  { "time": 25400,"text": "The locking mechanism ensures that one transaction cannot modify a row another is reading." },
+  { "time": 30000,"text": "We call this a shared lock versus an exclusive lock." },
+  { "time": 34500,"text": "Deadlocks can occur when two transactions wait for each other." },
+  { "time": 39000,"text": "The database detects the deadlock and rolls back one transaction." }
+]
