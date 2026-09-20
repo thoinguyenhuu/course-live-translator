@@ -16,3 +16,7 @@ uuid = { version = "1.4", features = ["v4"] }
 anyhow = "1.0"
 urlencoding = "2.1"
 futures-util = "0.3"
+tray-item = "0.10.0"
+
+[build-dependencies]
+winres = "0.1.12"

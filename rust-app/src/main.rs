@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 mod audio;
 mod domain;
 mod pipeline;
@@ -10,6 +12,14 @@ use serde_json::Value;
 use tokio::net::TcpListener;
 use tokio::sync::{broadcast, mpsc};
 use tokio_tungstenite::accept_async;
+use tray_item::{IconSource, TrayItem};
+
+#[cfg(windows)]
+extern "system" {
+    fn AttachConsole(dw_process_id: u32) -> i32;
+}
+#[cfg(windows)]
+const ATTACH_PARENT_PROCESS: u32 = 0xFFFFFFFF;
 
 fn load_env() {
     let env_paths = ["../.env", ".env", "../../.env"];
@@ -31,6 +41,11 @@ fn load_env() {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    #[cfg(windows)]
+    unsafe {
+        AttachConsole(ATTACH_PARENT_PROCESS);
+    }
+
     load_env();
     tracing_subscriber::fmt::init();
     let listener = TcpListener::bind("127.0.0.1:3847").await?;
@@ -38,6 +53,33 @@ async fn main() -> anyhow::Result<()> {
     let (tx_control, _rx_control) = broadcast::channel(10);
 
     pipeline::start_pipeline(rx_subtitle, tx_control.subscribe())?;
+
+    let mut _tray = match TrayItem::new("Coursera Translator", IconSource::Resource("#1")) {
+        Ok(mut tray) => {
+            let _ = tray.add_label("Coursera Translator");
+            let _ = tray.add_label("Cổng: 3847 (Đang chạy)");
+            let _ = tray.inner_mut().add_separator();
+            let _ = tray.add_menu_item("Mở thư mục Extension", || {
+                let _ = std::process::Command::new("explorer")
+                    .arg("..\\extension")
+                    .spawn();
+            });
+            let _ = tray.inner_mut().add_separator();
+            let _ = tray.add_menu_item("Thoát", || {
+                println!("[SystemTray] Người dùng chọn Thoát");
+                std::process::exit(0);
+            });
+            println!("[SystemTray] Đã khởi tạo icon trên khay hệ thống");
+            Some(tray)
+        }
+        Err(e) => {
+            eprintln!(
+                "[SystemTray] Cảnh báo: Không thể tạo icon khay hệ thống: {:?}",
+                e
+            );
+            None
+        }
+    };
 
     println!("Coursera Rust Translator is running!");
     println!("Listening on ws://127.0.0.1:3847");
