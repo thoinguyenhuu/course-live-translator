@@ -27,8 +27,10 @@ pub struct Translator {
 
 impl Translator {
     pub fn new() -> Self {
-        let base_url = std::env::var("NINEROUTER_BASE_URL")
-            .unwrap_or_else(|_| "http://127.0.0.1:20128/v1".to_string());
+        let base_url = std::env::var("AI_API_BASE_URL")
+            .or_else(|_| std::env::var("OPENAI_BASE_URL"))
+            .or_else(|_| std::env::var("NINEROUTER_BASE_URL"))
+            .unwrap_or_else(|_| "https://api.openai.com/v1".to_string());
         Self {
             client: reqwest::Client::builder()
                 .timeout(Duration::from_secs(8))
@@ -61,8 +63,12 @@ impl Translator {
 
     async fn do_translate(&self, text: &str, context: &[String]) -> Result<String> {
         let model = std::env::var("TRANSLATION_MODEL")
-            .unwrap_or_else(|_| "ag/gemini-3.7-flash-low".to_string());
-        let api_key = std::env::var("NINEROUTER_API_KEY").unwrap_or_else(|_| "no-key".to_string());
+            .or_else(|_| std::env::var("MODEL_NAME"))
+            .unwrap_or_else(|_| "gpt-4o-mini".to_string());
+        let api_key = std::env::var("AI_API_KEY")
+            .or_else(|_| std::env::var("OPENAI_API_KEY"))
+            .or_else(|_| std::env::var("NINEROUTER_API_KEY"))
+            .unwrap_or_else(|_| "no-key".to_string());
 
         let context_block = if !context.is_empty() {
             let list = context

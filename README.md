@@ -39,12 +39,12 @@ Sao chép `.env.example` thành `.env` tại thư mục gốc:
 ```bash
 cp .env.example .env
 ```
-Điền `NINEROUTER_API_KEY` hoặc API key OpenAI-compatible của bạn:
+Điền thông tin API của bạn (Hỗ trợ mọi nhà cung cấp chuẩn OpenAI: OpenAI, Groq, OpenRouter, Ollama, vLLM...):
 ```env
 PORT=3847
-NINEROUTER_BASE_URL=http://localhost:20128/v1
-NINEROUTER_API_KEY=your_api_key_here
-TRANSLATION_MODEL=ag/gemini-3.7-flash-low
+AI_API_BASE_URL=https://api.openai.com/v1
+AI_API_KEY=your_api_key_here
+MODEL_NAME=gpt-4o-mini
 AUDIO_SPEED=1.15
 ```
 
