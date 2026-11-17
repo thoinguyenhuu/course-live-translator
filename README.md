@@ -64,7 +64,7 @@ target/release/coursera-rust-translator.exe
 1. Mở Chrome và truy cập: `chrome://extensions/`
 2. Bật công tắc **Developer mode** (Chế độ dành cho nhà phát triển).
 3. Bấm **Load unpacked** (Tải tiện ích đã giải nén) và chọn thư mục `extension/` của dự án.
-4. Mở bài giảng trên Coursera (hoặc nền tảng hỗ trợ), ứng dụng sẽ tự động kết nối và dịch giọng nói trực tiếp.
+4. Mở bài giảng trên Coursera hoặc Udemy, ứng dụng sẽ tự động kết nối và dịch giọng nói trực tiếp.
 
 ---
 
